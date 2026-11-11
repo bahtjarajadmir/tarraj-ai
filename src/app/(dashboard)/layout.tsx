@@ -1,6 +1,5 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { AppShell } from "@/components/app/app-shell";
+import { getCurrentContext } from "@/lib/current-org";
 
 export const instant = false;
 
@@ -9,8 +8,11 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) redirect("/login");
+  const { user, organization } = await getCurrentContext();
 
-  return <>{children}</>;
+  return (
+    <AppShell organizationName={organization.name} userName={user.name}>
+      {children}
+    </AppShell>
+  );
 }
