@@ -88,7 +88,10 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  memberships Membership[]
+  memberships  Membership[]
+  accounts     FinancialAccount[]
+  categories   Category[]
+  transactions Transaction[]
 
   @@map("organizations")
 }
@@ -105,4 +108,55 @@ model Membership {
   @@unique([userId, organizationId])
   @@index([organizationId])
   @@map("memberships")
+}
+
+// ---------- Financat ----------
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model FinancialAccount {
+  id             String       @id @default(cuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  transactions Transaction[]
+
+  @@index([organizationId])
+  @@map("financial_accounts")
+}
+
+model Category {
+  id             String          @id @default(cuid())
+  name           String
+  type           TransactionType
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  transactions Transaction[]
+
+  @@unique([organizationId, name, type])
+  @@map("categories")
+}
+
+model Transaction {
+  id             String          @id @default(cuid())
+  type           TransactionType
+  amountCents    Int
+  date           DateTime
+  description    String?
+  organizationId String
+  categoryId     String
+  accountId      String
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category       Category         @relation(fields: [categoryId], references: [id])
+  account        FinancialAccount @relation(fields: [accountId], references: [id])
+  createdAt      DateTime         @default(now())
+
+  @@index([organizationId, date])
+  @@map("transactions")
 }

@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { ensureDefaults } from "@/modules/transactions/defaults";
 
 export async function createOrganization(name: string) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -11,7 +12,7 @@ export async function createOrganization(name: string) {
   const clean = name.trim();
   if (clean.length < 2) throw new Error("Company name is too short");
 
-  await db.organization.create({
+  const organization = await db.organization.create({
     data: {
       name: clean,
       memberships: {
@@ -19,4 +20,6 @@ export async function createOrganization(name: string) {
       },
     },
   });
+
+  await ensureDefaults(organization.id);
 }
