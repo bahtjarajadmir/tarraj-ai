@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:17
+    container_name: tarraj-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tarraj
+      POSTGRES_PASSWORD: tarraj_dev_password
+      POSTGRES_DB: tarraj
+    ports:
+      - "5432:5432"
+    volumes:
+      - tarraj-data:/var/lib/postgresql/data
+
+volumes:
+  tarraj-data:
