@@ -92,6 +92,7 @@ model Organization {
   accounts     FinancialAccount[]
   categories   Category[]
   transactions Transaction[]
+  customers    Customer[]
 
   @@map("organizations")
 }
@@ -159,4 +160,19 @@ model Transaction {
 
   @@index([organizationId, date])
   @@map("transactions")
+}
+// ---------- Klientët ----------
+
+model Customer {
+  id             String       @id @default(cuid())
+  name           String
+  email          String?
+  phone          String?
+  address        String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@map("customers")
 }
