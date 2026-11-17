@@ -70,6 +70,9 @@ export async function POST(req: Request) {
     include: { organization: true },
   });
   if (!membership) return textResponse("No company found.", 403);
+    if (process.env.AI_ENABLED !== "true") {
+    return textResponse("The AI assistant is not available yet.", 503);
+  }
 
   const organizationId = membership.organization.id;
   const userId = session.user.id;
