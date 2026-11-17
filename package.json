@@ -12,6 +12,7 @@
     "@base-ui/react": "^1.9.0",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "7.10.0",
+    "@tailwindcss/postcss": "^4.3.5",
     "better-auth": "^1.7.20",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
@@ -34,7 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "prisma": "7.10.0",
-    "tailwindcss": "4.3.3",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^5"
   }
