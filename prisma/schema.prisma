@@ -93,6 +93,7 @@ model Organization {
   categories   Category[]
   transactions Transaction[]
   customers    Customer[]
+  invoices     Invoice[]
 
   @@map("organizations")
 }
@@ -145,7 +146,7 @@ model Category {
 }
 
 model Transaction {
-  id             String          @id @default(cuid())
+  id             String           @id @default(cuid())
   type           TransactionType
   amountCents    Int
   date           DateTime
@@ -161,6 +162,7 @@ model Transaction {
   @@index([organizationId, date])
   @@map("transactions")
 }
+
 // ---------- Klientët ----------
 
 model Customer {
@@ -173,6 +175,50 @@ model Customer {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())
 
+  invoices Invoice[]
+
   @@index([organizationId])
   @@map("customers")
+}
+
+// ---------- Faturat ----------
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  number         Int
+  status         InvoiceStatus @default(DRAFT)
+  issueDate      DateTime
+  dueDate        DateTime
+  notes          String?
+  totalCents     Int
+  paidAt         DateTime?
+  organizationId String
+  customerId     String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  createdAt      DateTime      @default(now())
+
+  items InvoiceItem[]
+
+  @@unique([organizationId, number])
+  @@index([organizationId, status])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id             String  @id @default(cuid())
+  description    String
+  quantity       Int
+  unitPriceCents Int
+  invoiceId      String
+  invoice        Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_items")
 }
