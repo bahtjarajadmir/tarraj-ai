@@ -69,8 +69,8 @@ export function Chat() {
         <div className="h-[calc(100vh-24rem)] min-h-64 space-y-4 overflow-y-auto pr-1">
           {messages.length === 0 && (
             <p className="py-12 text-center text-sm text-muted-foreground">
-              Ask me about cash flow, invoicing or budgeting. I cannot see your
-              company data yet.
+                            Ask about your income, expenses, invoices or budgets. Answers can
+              take up to a minute on a small computer.
             </p>
           )}
 
