@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { Plus, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,17 @@ import { cn } from "@/lib/utils";
 
 type Message = { role: "user" | "assistant"; content: string };
 
-export function Chat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function Chat({
+  initialMessages,
+  initialConversationId,
+}: {
+  initialMessages: Message[];
+  initialConversationId: string | null;
+}) {
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [conversationId, setConversationId] = useState<string | null>(
+    initialConversationId
+  );
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -19,6 +28,13 @@ export function Chat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  function newChat() {
+    if (pending) return;
+    setMessages([]);
+    setConversationId(null);
+    setError("");
+  }
 
   async function send(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -36,25 +52,19 @@ export function Chat() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history.slice(-20) }),
+        body: JSON.stringify({
+          message: text,
+          ...(conversationId && { conversationId }),
+        }),
       });
 
-      if (!res.ok || !res.body) {
-        throw new Error((await res.text()) || "Something went wrong.");
-      }
+      const answer = await res.text();
+      if (!res.ok) throw new Error(answer || "Something went wrong.");
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let answer = "";
+      const newId = res.headers.get("X-Conversation-Id");
+      if (newId) setConversationId(newId);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        answer += decoder.decode(value, { stream: true });
-        setMessages([...history, { role: "assistant", content: answer }]);
-      }
-
-      if (!answer.trim()) throw new Error("The assistant returned no answer.");
+      setMessages([...history, { role: "assistant", content: answer }]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
       setMessages(history);
@@ -66,10 +76,22 @@ export function Chat() {
   return (
     <Card>
       <CardContent className="space-y-4">
-        <div className="h-[calc(100vh-24rem)] min-h-64 space-y-4 overflow-y-auto pr-1">
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={newChat}
+            disabled={pending || messages.length === 0}
+          >
+            <Plus className="size-4" /> New chat
+          </Button>
+        </div>
+
+        <div className="h-[calc(100vh-27rem)] min-h-64 space-y-4 overflow-y-auto pr-1">
           {messages.length === 0 && (
             <p className="py-12 text-center text-sm text-muted-foreground">
-                            Ask about your income, expenses, invoices or budgets. Answers can
+              Ask about your income, expenses, invoices or budgets. Answers can
               take up to a minute on a small computer.
             </p>
           )}

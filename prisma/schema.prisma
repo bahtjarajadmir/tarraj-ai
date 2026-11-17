@@ -18,9 +18,10 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  sessions    Session[]
-  accounts    Account[]
-  memberships Membership[]
+  sessions      Session[]
+  accounts      Account[]
+  memberships   Membership[]
+  conversations Conversation[]
 
   @@map("users")
 }
@@ -88,13 +89,14 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  memberships  Membership[]
-  accounts     FinancialAccount[]
-  categories   Category[]
-  transactions Transaction[]
-  customers    Customer[]
-  invoices     Invoice[]
-  budgets      Budget[]
+  memberships   Membership[]
+  accounts      FinancialAccount[]
+  categories    Category[]
+  transactions  Transaction[]
+  customers     Customer[]
+  invoices      Invoice[]
+  budgets       Budget[]
+  conversations Conversation[]
 
   @@map("organizations")
 }
@@ -238,4 +240,41 @@ model InvoiceItem {
 
   @@index([invoiceId])
   @@map("invoice_items")
+}
+
+// ---------- Asistenti AI ----------
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+model Conversation {
+  id             String        @id @default(cuid())
+  title          String
+  organizationId String
+  userId         String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  messages ChatMessage[]
+
+  @@index([organizationId, userId, updatedAt])
+  @@map("conversations")
+}
+
+model ChatMessage {
+  id             String       @id @default(cuid())
+  role           ChatRole
+  content        String
+  conversationId String
+  organizationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([organizationId, role, createdAt])
+  @@map("chat_messages")
 }
