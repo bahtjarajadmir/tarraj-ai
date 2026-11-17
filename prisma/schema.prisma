@@ -94,6 +94,7 @@ model Organization {
   transactions Transaction[]
   customers    Customer[]
   invoices     Invoice[]
+  budgets      Budget[]
 
   @@map("organizations")
 }
@@ -140,6 +141,7 @@ model Category {
   organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   transactions Transaction[]
+  budgets      Budget[]
 
   @@unique([organizationId, name, type])
   @@map("categories")
@@ -161,6 +163,21 @@ model Transaction {
 
   @@index([organizationId, date])
   @@map("transactions")
+}
+
+// ---------- Buxhetet ----------
+
+model Budget {
+  id             String       @id @default(cuid())
+  amountCents    Int
+  organizationId String
+  categoryId     String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category       Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, categoryId])
+  @@map("budgets")
 }
 
 // ---------- Klientët ----------
