@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentContext } from "@/lib/current-org";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/money";
+import { InvoiceActions } from "@/modules/invoices/invoice-actions";
 import { StatusBadge } from "@/modules/invoices/status-badge";
 import {
   formatInvoiceNumber,
@@ -47,6 +48,7 @@ export default async function InvoicesPage() {
                   <th className="pb-3 font-medium">Due</th>
                   <th className="pb-3 font-medium">Status</th>
                   <th className="pb-3 text-right font-medium">Total</th>
+                  <th className="pb-3" />
                 </tr>
               </thead>
               <tbody>
@@ -69,6 +71,9 @@ export default async function InvoicesPage() {
                     </td>
                     <td className="num py-3 text-right font-medium">
                       {formatMoney(inv.totalCents, organization.currency)}
+                    </td>
+                    <td className="py-3">
+                      <InvoiceActions id={inv.id} status={inv.status} />
                     </td>
                   </tr>
                 ))}
